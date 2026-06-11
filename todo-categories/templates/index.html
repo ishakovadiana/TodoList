@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Список дел с категориями</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>✅ Мой список дел</h1>
+            <div>
+                <span class="me-3">👤 {{ username }}</span>
+                <a href="/logout" class="btn btn-outline-danger btn-sm">Выйти</a>
+            </div>
+        </div>
+        
+        <!-- Поиск -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form action="/search" method="get" class="row g-2">
+                    <div class="col-10">
+                        <input type="text" name="q" class="form-control" placeholder="Поиск задач..." value="{{ search_query or '' }}">
+                    </div>
+                    <div class="col-2">
+                        <button type="submit" class="btn btn-primary w-100">🔍 Найти</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Фильтр по категориям -->
+        <div class="mb-3">
+            <span class="me-2">📂 Категории:</span>
+            {% for cat in categories %}
+                <a href="/?category={{ cat }}" class="btn btn-sm {% if current_category == cat %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                    {{ cat }}
+                </a>
+            {% endfor %}
+        </div>
+        
+        <!-- Список задач -->
+        <div class="row">
+            {% if tasks %}
+                {% for task in tasks %}
+                <div class="col-md-6 mb-3">
+                    <div class="card {% if task.done %}bg-light{% endif %}">
+                        <div class="card-body">
+                            <h5 class="card-title {% if task.done %}text-decoration-line-through{% endif %}">
+                                {{ task.title }}
+                            </h5>
+                            <p class="card-text text-muted small">{{ task.description or 'Нет описания' }}</p>
+                            <p class="small mb-1">📂 {{ task.category }}</p>
+                            <div class="d-flex gap-2 mt-2">
+                                {% if task.done %}
+                                    <span class="badge bg-success">✅ Выполнено</span>
+                                    <a href="/toggle/{{ task.id }}" class="btn btn-warning btn-sm">↩️ Вернуть</a>
+                                {% else %}
+                                    <a href="/toggle/{{ task.id }}" class="btn btn-success btn-sm">✅ Выполнить</a>
+                                {% endif %}
+                                <a href="/edit/{{ task.id }}" class="btn btn-info btn-sm">✏️ Редактировать</a>
+                                <a href="/delete/{{ task.id }}" class="btn btn-danger btn-sm" onclick="return confirm('Удалить задачу?')">🗑️ Удалить</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info">Нет задач. Добавьте первую!</div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Форма добавления -->
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">➕ Добавить задачу</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/add">
+                    <div class="mb-3">
+                        <input type="text" name="title" class="form-control" placeholder="Название задачи" required>
+                    </div>
+                    <div class="mb-3">
+                        <textarea name="description" class="form-control" placeholder="Описание (необязательно)" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <select name="category" class="form-select">
+                            <option value="работа">💼 Работа</option>
+                            <option value="личное">💚 Личное</option>
+                            <option value="учеба">📚 Учеба</option>
+                            <option value="дом">🏠 Дом</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Добавить задачу</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
